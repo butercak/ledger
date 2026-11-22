@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6f5e">
+<title>記帳</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar"><h1 id="pageTitle">總覽</h1></header>
+
+<main>
+  <section id="view-home" class="view active"></section>
+  <section id="view-records" class="view"></section>
+  <section id="view-stats" class="view"></section>
+  <section id="view-settings" class="view"></section>
+</main>
+
+<button id="fab" class="fab" aria-label="新增支出">＋</button>
+
+<nav class="tabbar">
+  <button data-view="home" class="active"><span>🏠</span>總覽</button>
+  <button data-view="records"><span>📝</span>紀錄</button>
+  <button data-view="stats"><span>📊</span>統計</button>
+  <button data-view="settings"><span>⚙️</span>設定</button>
+</nav>
+
+<!-- 新增/編輯支出 -->
+<dialog id="entryDialog">
+  <form id="entryForm" method="dialog">
+    <h2 id="entryTitle">新增支出</h2>
+    <div class="row amount-row">
+      <select id="fCurrency">
+        <option value="SGD">S$</option>
+        <option value="JPY">¥</option>
+        <option value="TWD">NT$</option>
+      </select>
+      <input id="fAmount" type="number" inputmode="decimal" step="any" placeholder="金額" required>
+    </div>
+    <div id="fxBox" class="fx hidden">
+      <div class="muted small" id="fxHint"></div>
+      <label class="inline"><span>新幣金額</span><input id="fSgd" type="number" inputmode="decimal" step="any" placeholder="留空＝用匯率估算"></label>
+      <label class="check"><input id="fPending" type="checkbox"> 暫估（等實際扣款再改）</label>
+    </div>
+    <div class="catgrid" id="fCats"></div>
+    <label class="inline"><span>日期</span><input id="fDate" type="date" required></label>
+    <label class="inline"><span>備註</span><input id="fNote" type="text" placeholder="買了什麼"></label>
+    <label class="check"><input id="fExcluded" type="checkbox"> 不計入預算/統計（代購、代墊、押金…）</label>
+    <div class="actions">
+      <button type="button" id="fDelete" class="danger hidden">刪除</button>
+      <span class="spacer"></span>
+      <button type="button" id="fCancel" class="ghost">取消</button>
+      <button type="submit" class="primary">儲存</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- 預算調整 -->
+<dialog id="adjDialog">
+  <form id="adjForm" method="dialog">
+    <h2>預算調整 / 轉移</h2>
+    <p class="muted small">例：預支下個月購物額度、從購物調錢到旅遊基金。</p>
+    <label class="inline"><span>從</span><select id="aFrom"></select></label>
+    <label class="inline"><span>到</span><select id="aTo"></select></label>
+    <label class="inline"><span>金額</span><input id="aAmount" type="number" inputmode="decimal" step="any" required></label>
+    <label class="inline"><span>日期</span><input id="aDate" type="date" required></label>
+    <label class="inline"><span>備註</span><input id="aNote" type="text"></label>
+    <div class="actions">
+      <span class="spacer"></span>
+      <button type="button" id="aCancel" class="ghost">取消</button>
+      <button type="submit" class="primary">儲存</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
