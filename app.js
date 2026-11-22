@@ -12,6 +12,9 @@ const DEFAULT_CATS = [
   { id:'med',    emoji:'💊', name:'醫療', period:'none',  amount:0 },
   { id:'trans',  emoji:'🚇', name:'交通', period:'none',  amount:0, transport:true },
   { id:'study',  emoji:'📚', name:'學業', period:'none',  amount:0 },
+  { id:'sub',    emoji:'📺', name:'訂閱', period:'none',  amount:0 },
+  { id:'house',  emoji:'🏠', name:'住房', period:'none',  amount:0 },
+  { id:'trip',   emoji:'✈️', name:'旅遊', period:'none',  amount:0 },
   { id:'other',  emoji:'📦', name:'其他', period:'none',  amount:0 },
 ];
 function defaultState(){
@@ -91,7 +94,7 @@ function walletWeek(ws){
 /* 旅遊基金：已結束的每週「吃飯＋點心」結餘（可為負）＋調整 */
 function travelFund(){
   const curWs = weekStart(today());
-  let bal = S.settings.travelStart || 0, ws = weekStart(S.settings.startDate);
+  let bal = S.settings.travelStart || 0, ws = weekStart(S.settings.travelFrom || S.settings.startDate);
   while(ws < curWs){ bal += walletWeek(ws).remaining; ws = addDays(ws,7); }
   bal += adjNet('travel', '0000-01-01', '9999-12-31');
   return { balance:r2(bal), thisWeek: walletWeek(curWs).remaining };
@@ -108,7 +111,8 @@ function budgetLine(c, st, wallet){
     if(c.id==='food' && st.remaining>0) sub = `平均剩 ${money(st.remaining/st.daysLeft)}/天`;
   } else {
     main = `<b class="${st.remaining<0?'neg':''}">${st.remaining<0?'超出 '+money(-st.remaining):'本月剩 '+money(st.remaining)}</b>`;
-    sub = c.rollover && st.carry ? `含滾存 ${money(st.carry)}` : '';
+    const extra = r2(st.limit - c.amount);
+    sub = extra ? `${c.rollover?'含滾存/調整':'含調整'} ${money(extra)}` : '';
   }
   const pct = st.limit>0 ? Math.min(100, Math.max(0, st.spent/st.limit*100)) : 100;
   return `<div class="budget-row"><div><div class="name">${c.emoji} ${c.name}</div>
@@ -259,6 +263,7 @@ function renderSettings(){
       <button class="link" id="addCat">＋ 新增分類</button></div>
     <div class="card"><h3>基本設定</h3>
       <label class="inline"><span>開始日</span><input type="date" id="sStart" value="${s.startDate}"></label>
+      <label class="inline"><span>旅遊基金開始日</span><input type="date" id="sTravelFrom" value="${s.travelFrom||s.startDate}"></label>
       <label class="inline"><span>旅遊基金起始</span><input type="number" step="any" id="sTravel" value="${s.travelStart}"></label>
       <label class="inline"><span>¥1 =S$</span><input type="number" step="any" id="sJPY" value="${s.rates.JPY}"></label>
       <label class="inline"><span>NT$1 =S$</span><input type="number" step="any" id="sTWD" value="${s.rates.TWD}"></label>
@@ -286,6 +291,7 @@ function renderSettings(){
   const bind=(id,fn)=>v.querySelector(id).onchange=e=>{fn(e.target);save();renderAll();};
   bind('#sStart',t=>s.startDate=t.value||s.startDate);
   bind('#sTravel',t=>s.travelStart=Number(t.value)||0);
+  bind('#sTravelFrom',t=>s.travelFrom=t.value||s.startDate);
   bind('#sJPY',t=>s.rates.JPY=Number(t.value)||s.rates.JPY);
   bind('#sTWD',t=>s.rates.TWD=Number(t.value)||s.rates.TWD);
   bind('#sEarly',t=>s.earlyMorning=t.checked);
